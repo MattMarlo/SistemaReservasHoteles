@@ -16,10 +16,6 @@ class Huesped extends Model
 
     public function reservas()
     {
-        return $this->hasMany(Reserva::class);
-    }
-
-    public function canDelete() {
-        return $this->reservas()->count() === 0;
+        return $this->hasMany(Reserva::class, 'huespedes_id');
     }
 }

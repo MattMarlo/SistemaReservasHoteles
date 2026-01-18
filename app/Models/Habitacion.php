@@ -14,10 +14,6 @@ class Habitacion extends Model
         'estado'
     ];
     public function reservas(){
-        return $this->hasMany(Reserva::class);
-    }
-
-    public function canDelete() {
-        return $this->reservas()->count() === 0;
+        return $this->hasMany(Reserva::class, 'habitaciones_id');
     }
 }

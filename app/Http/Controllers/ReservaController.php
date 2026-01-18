@@ -36,9 +36,35 @@ class ReservaController extends Controller
     public function store(Request $request)
     {
        try{
-            if (!Reserva::validateReservation($request->habitaciones_id, $request->huespedes_id, $request->fecha_entrada, $request->fecha_salida)) {
-                return to_route('reservas')->with('error', 'No se puede crear la reserva: conflicto de fechas o reserva duplicada para el huésped en esta habitación.');
+            $habitacionId = $request->habitaciones_id;
+            $huespedId = $request->huespedes_id;
+            $fechaEntrada = $request->fecha_entrada;
+            $fechaSalida = $request->fecha_salida;
+
+            // Verificar si el huésped ya tiene una reserva para esta habitación
+            if (Reserva::where('habitaciones_id', $habitacionId)
+                ->where('huespedes_id', $huespedId)
+                ->exists()) {
+                return to_route('reservas')->with('error', 'El huésped ya tiene una reserva para esta habitación.');
             }
+
+            // Verificar solapamiento de fechas para la habitación
+            $overlapping = Reserva::where('habitaciones_id', $habitacionId)
+                ->where('estado', '!=', 'Cancelada')
+                ->where(function ($query) use ($fechaEntrada, $fechaSalida) {
+                    $query->whereBetween('fecha_entrada', [$fechaEntrada, $fechaSalida])
+                          ->orWhereBetween('fecha_salida', [$fechaEntrada, $fechaSalida])
+                          ->orWhere(function ($q) use ($fechaEntrada, $fechaSalida) {
+                              $q->where('fecha_entrada', '<=', $fechaEntrada)
+                                ->where('fecha_salida', '>=', $fechaSalida);
+                          });
+                })
+                ->exists();
+
+            if ($overlapping) {
+                return to_route('reservas')->with('error', 'Conflicto de fechas: la habitación ya está reservada en esas fechas.');
+            }
+
             $reserva = new Reserva();
             $reserva->habitaciones_id=$request->habitaciones_id;
             $reserva->huespedes_id=$request->huespedes_id;
@@ -48,7 +74,7 @@ class ReservaController extends Controller
             $reserva->save();
             return to_route('reservas')->with('success','reserva creada exitosamente');
         }catch(\Throwable $th){
-            return to_route('reservas')->with('error','Falló al crear la reserva'.$th->getMessage());
+            return to_route('reservas')->with('error','Ocurrió un error al crear la reserva. Por favor, contacta al administrador.');
         } 
         
     }
@@ -82,6 +108,15 @@ class ReservaController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $reserva = Reserva::find($id);
+            if (!$reserva) {
+                return to_route('reservas')->with('error', 'Reserva no encontrada.');
+            }
+            $reserva->delete();
+            return to_route('reservas')->with('success', 'Reserva eliminada correctamente.');
+        } catch (\Throwable $th) {
+            return to_route('reservas')->with('error', 'Ocurrió un error al intentar eliminar la reserva. Por favor, contacta al administrador.');
+        }
     }
 }

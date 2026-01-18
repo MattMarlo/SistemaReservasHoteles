@@ -62,7 +62,7 @@
                       <form action="{{ route('reservas.delete', $reserva->id) }}" method="POST" class="d-inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este Huesped?')">
+                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta Reserva?')">
                           <i class="fa-solid fa-trash-can"></i>
                         </button>
                       </form>
