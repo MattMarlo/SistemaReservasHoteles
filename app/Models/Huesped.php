@@ -18,4 +18,8 @@ class Huesped extends Model
     {
         return $this->hasMany(Reserva::class);
     }
+
+    public function canDelete() {
+        return $this->reservas()->count() === 0;
+    }
 }

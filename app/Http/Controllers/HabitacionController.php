@@ -103,6 +103,9 @@ class HabitacionController extends Controller
     {
         try{
             $habitacion=Habitacion::find($id);
+            if (!$habitacion->canDelete()) {
+                return to_route('habitaciones')->with('error', 'No se puede eliminar la habitación porque tiene reservas asociadas.');
+            }
             $habitacion->delete();
             return to_route('habitaciones')->with('success',"se ha eliminado correctamente");
         }catch(\Throwable $th){

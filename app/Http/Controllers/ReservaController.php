@@ -36,6 +36,9 @@ class ReservaController extends Controller
     public function store(Request $request)
     {
        try{
+            if (!Reserva::validateReservation($request->habitaciones_id, $request->huespedes_id, $request->fecha_entrada, $request->fecha_salida)) {
+                return to_route('reservas')->with('error', 'No se puede crear la reserva: conflicto de fechas o reserva duplicada para el huésped en esta habitación.');
+            }
             $reserva = new Reserva();
             $reserva->habitaciones_id=$request->habitaciones_id;
             $reserva->huespedes_id=$request->huespedes_id;

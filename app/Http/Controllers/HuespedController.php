@@ -102,6 +102,9 @@ class HuespedController extends Controller
     {
         try{
             $huesped=Huesped::find($id);
+            if (!$huesped->canDelete()) {
+                return to_route('huespedes')->with('error', 'No se puede eliminar el huésped porque tiene reservas asociadas.');
+            }
             $huesped->delete();
             return to_route('huespedes')->with('success',"se ha eliminado correctamente");
         }catch(\Throwable $th){
