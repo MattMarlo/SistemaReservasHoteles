@@ -32,7 +32,23 @@ class HabitacionController extends Controller
      */
     public function store(Request $request)
     {
-         try
+        $rules = [
+            'numero' => 'required|unique:habitaciones,numero',
+            'tipo' => 'required|in:Simple,Doble,Suite',
+            'precio' => 'required|numeric|min:0',
+            'estado' => 'required|in:Disponible,Ocupada',
+        ];
+
+        $messages = [
+            'numero.unique' => 'Ya existe una habitación con ese número.',
+            'tipo.required' => 'El tipo de habitación es obligatorio.',
+            'precio.required' => 'El precio es obligatorio.',
+            'estado.required' => 'El estado es obligatorio.',
+        ];
+
+        $request->validate($rules, $messages);
+
+        try
         {
             $habitacion=new Habitacion();
             $habitacion->numero=$request->numero;
@@ -43,8 +59,8 @@ class HabitacionController extends Controller
             
             return to_route('habitaciones')->with('success','Habitación creada correctamente');
         }
-        catch(Exception $e){
-            return to_route('habitaciones')->with('error','No se pudo crear la habitación !'.$e->getMessage());
+        catch(\Throwable $th){
+            return to_route('habitaciones')->with('error', 'Ocurrió un error al crear la habitación. Por favor, contacta al administrador.');
         }
     }
 

@@ -162,6 +162,15 @@
         confirmButtonText:'Aceptar'
       });
     @endif
+
+    @if($errors->any())
+      Swal.fire({
+        title: 'Error!',
+        text: '{{ $errors->first() }}',
+        icon: 'error',
+        confirmButtonText:'Aceptar'
+      });
+    @endif
   </script>
 
   @stack('scripts')
