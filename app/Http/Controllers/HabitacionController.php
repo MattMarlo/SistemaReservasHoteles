@@ -87,6 +87,22 @@ class HabitacionController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $rules = [
+            'numero' => 'required|unique:habitaciones,numero,' . $id,
+            'tipo' => 'required|in:Simple,Doble,Suite',
+            'precio' => 'required|numeric|min:0',
+            'estado' => 'required|in:Disponible,Ocupada',
+        ];
+
+        $messages = [
+            'numero.unique' => 'Ya existe una habitación con ese número.',
+            'tipo.required' => 'El tipo de habitación es obligatorio.',
+            'precio.required' => 'El precio es obligatorio.',
+            'estado.required' => 'El estado es obligatorio.',
+        ];
+
+        $request->validate($rules, $messages);
+
         try {
         $habitacion = Habitacion::find($id);
 
@@ -108,7 +124,7 @@ class HabitacionController extends Controller
         } catch (\Throwable $th) {
 
             return to_route('habitaciones')
-                ->with('error', 'No se pudo actualizar. ' . $th->getMessage());
+                ->with('error', 'Ocurrió un error al actualizar la habitación. Por favor, contacta al administrador.');
         }
     }
 

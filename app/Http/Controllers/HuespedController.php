@@ -86,6 +86,22 @@ class HuespedController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $rules = [
+            'nombre' => 'required|string|max:255',
+            'apellido' => 'required|string|max:100',
+            'cedula' => 'required|unique:huespedes,cedula,' . $id,
+            'telefono' => 'nullable|string|max:20',
+        ];
+
+        $messages = [
+            'cedula.unique' => 'Ya existe un huésped con esa cédula.',
+            'nombre.required' => 'El nombre es obligatorio.',
+            'apellido.required' => 'El apellido es obligatorio.',
+            'cedula.required' => 'La cédula es obligatoria.',
+        ];
+
+        $request->validate($rules, $messages);
+
         try {
         $item = Huesped::find($id);
 
@@ -107,7 +123,7 @@ class HuespedController extends Controller
         } catch (\Throwable $th) {
 
             return to_route('huespedes')
-                ->with('error', 'No se pudo actualizar. ' . $th->getMessage());
+                ->with('error', 'Ocurrió un error al actualizar el huésped. Por favor, contacta al administrador.');
         }
     }
 
