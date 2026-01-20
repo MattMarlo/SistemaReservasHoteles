@@ -3,11 +3,7 @@
     <div class="d-flex align-items-center justify-content-between">
       <a href="index.html" class="logo d-flex align-items-center">
         <img src="assets/img/logo.png" alt="">
-<<<<<<< HEAD
-       
-=======
-       
->>>>>>> e74882dde8ba45fe1bbb8a8be33146677328cd61
+          <p>hotel</p>
       </a>
       <i class="bi bi-list toggle-sidebar-btn"></i>
     </div><!-- End Logo -->
