@@ -41,6 +41,15 @@ class ReservaController extends Controller
             $fechaEntrada = $request->fecha_entrada;
             $fechaSalida = $request->fecha_salida;
 
+            $habitacion = Habitacion::find($habitacionId);
+            if (!$habitacion) {
+                return to_route('reservas')->with('error', 'Habitación no encontrada.');
+            }
+
+            if ($habitacion->estado == 'Ocupada') {
+                return to_route('reservas')->with('error', 'La habitación está ocupada.');
+            }
+
             // Verificar si el huésped ya tiene una reserva para esta habitación
             if (Reserva::where('habitaciones_id', $habitacionId)
                 ->where('huespedes_id', $huespedId)
@@ -72,6 +81,11 @@ class ReservaController extends Controller
             $reserva->fecha_salida=$request->fecha_salida;
             $reserva->estado=$request->estado;
             $reserva->save();
+
+            // Actualizar estado de la habitación a Ocupada
+            $habitacion->estado = 'Ocupada';
+            $habitacion->save();
+
             return to_route('reservas')->with('success','reserva creada exitosamente');
         }catch(\Throwable $th){
             return to_route('reservas')->with('error','Ocurrió un error al crear la reserva. Por favor, contacta al administrador.');
@@ -113,7 +127,15 @@ class ReservaController extends Controller
             if (!$reserva) {
                 return to_route('reservas')->with('error', 'Reserva no encontrada.');
             }
+            $habitacion = $reserva->habitaciones;
             $reserva->delete();
+
+            // Verificar si quedan reservas activas para esta habitación
+            if ($habitacion->reservas()->where('estado', 'Activa')->count() == 0) {
+                $habitacion->estado = 'Disponible';
+                $habitacion->save();
+            }
+
             return to_route('reservas')->with('success', 'Reserva eliminada correctamente.');
         } catch (\Throwable $th) {
             return to_route('reservas')->with('error', 'Ocurrió un error al intentar eliminar la reserva. Por favor, contacta al administrador.');
